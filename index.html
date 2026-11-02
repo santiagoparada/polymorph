@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="media/logo.png">
+<title>Polymorph</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Fraunces:ital,opsz,wght@1,9..144,500;1,9..144,600&family=JetBrains+Mono:wght@400;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<style>
+/* Layout: the page is the instrument's black panel; each section is a
+   panel module with its label set into a hairline, like the app's own MIXER / SPACE ECHO headers. */
+:root{
+  --panel:#000000; --panel-2:#141414; --module:#0d0d0d; --line:#262626;
+  --ink:#ece6da; --dim:#a0978a; --faint:#6e675e;
+  --amber:#f0a63a; --amber-deep:#c97f1c; --lcd:#130d05; --lcd-glow:rgba(240,166,58,.12);
+  --display:"Fraunces",Georgia,serif;
+  --body:"Newsreader",Georgia,"Times New Roman",serif;
+  --label:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --mono:"JetBrains Mono",Consolas,"Courier New",monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+html{background:var(--panel)}
+body{background:var(--panel);color:var(--ink);font-family:var(--body);font-size:18px;line-height:1.55;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--panel)}
+a{color:var(--amber)}
+::selection{background:var(--amber);color:var(--lcd)}
+
+
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+@media (min-width:761px){.wrap{padding-left:max(48px,env(safe-area-inset-left,0px));padding-right:max(48px,env(safe-area-inset-right,0px))}}
+
+/* module header: label sitting in a hairline */
+.mod-h{display:flex;align-items:center;gap:14px;margin:0 0 26px;font-family:var(--label);font-weight:700;font-size:15px;letter-spacing:.32em;text-transform:uppercase;color:var(--dim)}
+.mod-h::before,.mod-h::after{content:"";flex:1;height:1px;background:var(--line)}
+section{padding-block:64px}
+section+section{border-top:1px solid var(--line)}
+
+/* hero */
+.topbar{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:14px}
+@media (min-width:761px){.hero .wrap{position:relative}.topbar{position:absolute;top:0;right:max(48px,env(safe-area-inset-right,0px))}.mark{margin-top:0}}
+.lang{display:flex;gap:6px}
+.by{text-transform:none;letter-spacing:.04em;font-family:var(--mono);font-weight:600;color:var(--amber)}
+.hero{padding-block:22px 40px}
+.hero-top{display:flex;align-items:center;gap:14px;font-family:var(--label);font-weight:600;font-size:15px;letter-spacing:.24em;text-transform:uppercase;color:var(--dim)}
+.hero-top img{width:40px;height:40px;border-radius:9px}
+.mark{font-family:var(--display);font-style:italic;font-weight:600;font-size:clamp(64px,13vw,150px);line-height:1.05;letter-spacing:-.02em;margin:4px 0 30px;padding-bottom:.06em;color:var(--ink)}
+.mark span{color:var(--amber)}
+.hero-grid{display:block}
+@media (max-width:860px){.hero-grid{grid-template-columns:minmax(0,1fr)}}
+.lede{font-size:22px;line-height:1.45;color:var(--ink);max-width:34ch;margin:0;text-wrap:pretty}
+.lede em{color:var(--amber);font-style:italic}
+
+.lcd{background:var(--lcd);border:2px solid #000;border-radius:5px;padding:16px 20px;font-family:var(--mono);color:var(--amber);box-shadow:inset 0 0 26px var(--lcd-glow),0 1px 0 rgba(255,255,255,.04);min-width:0}
+.lcd .l1{font-size:13px;letter-spacing:.06em;opacity:.85}
+.lcd .l2{font-size:30px;font-weight:600;letter-spacing:.02em;line-height:1.25;margin:2px 0;min-height:1.25em;overflow-wrap:anywhere}
+.lcd .l3{font-size:13px;letter-spacing:.06em;opacity:.85;overflow-wrap:anywhere}
+.lcd .cursor{display:inline-block;width:.55em;height:1em;background:var(--amber);vertical-align:-.12em;margin-left:2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.progress{height:4px;background:#2a1d0b;border-radius:2px;margin-top:10px;overflow:hidden}
+.progress i{display:block;height:100%;width:0;background:var(--amber);transition:width .25s}
+
+.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.btn{appearance:none;border:0;cursor:pointer;font-family:var(--label);font-weight:700;font-size:17px;letter-spacing:.16em;text-transform:uppercase;padding:14px 22px;border-radius:6px;display:inline-flex;flex-direction:column;align-items:flex-start;gap:2px;text-decoration:none;line-height:1.1}
+.btn small{font-family:var(--body);font-size:13px;letter-spacing:0;text-transform:none;font-weight:400;opacity:.8}
+.btn-primary{background:var(--amber);color:#1a1006;box-shadow:0 2px 0 var(--amber-deep)}
+.btn-primary:hover{filter:brightness(1.06)}
+.btn-ghost{background:var(--panel-2);color:var(--ink);border:1px solid var(--line)}
+.btn-ghost:hover{border-color:var(--dim)}
+.btn:focus-visible,.lang .tab:focus-visible,.tab:focus-visible,.play:focus-visible,.copy:focus-visible{outline:2px solid var(--amber);outline-offset:3px}
+.btn[disabled]{opacity:.55;cursor:default}
+.note{font-size:15px;color:var(--dim);margin:12px 0 0}
+
+/* panel viewer */
+.viewer{margin-top:48px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tab{appearance:none;cursor:pointer;background:var(--panel-2);border:1px solid var(--line);color:var(--dim);font-family:var(--label);font-weight:700;font-size:14px;letter-spacing:.18em;text-transform:uppercase;padding:8px 14px;border-radius:4px;display:flex;align-items:center;gap:8px}
+.tab .led{width:7px;height:7px;border-radius:50%;background:#3a332b}
+.tab[aria-selected="true"],.tab[aria-pressed="true"]{color:var(--ink);border-color:#4a4239}
+.tab[aria-pressed="true"] .led,.tab[aria-selected="true"] .led{background:var(--amber);box-shadow:0 0 8px var(--amber)}
+.shot{border-radius:8px;overflow:hidden;border:1px solid #000;box-shadow:0 30px 60px -20px rgba(0,0,0,.7)}
+.shot img{display:block;width:100%;height:auto;max-width:100%}
+.shot-cap{font-size:15px;color:var(--dim);margin-top:10px;font-style:italic}
+
+/* inside */
+.inside{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+@media (max-width:900px){.inside{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.inside{grid-template-columns:minmax(0,1fr)}}
+.cell{background:var(--module);padding:22px 22px 24px;min-width:0}
+.cell.wide{grid-column:1/-1}
+.cell.wide p{max-width:80ch}
+.cell h3{font-family:var(--label);font-weight:700;font-size:16px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber);margin:0 0 8px}
+.cell p{margin:0;font-size:16.5px;color:var(--ink)}
+.cell .spec{font-family:var(--mono);font-size:12.5px;color:var(--dim);margin-top:12px;line-height:1.6}
+.intro{max-width:62ch;font-size:19px;color:var(--ink);margin:0 0 30px}
+
+/* steps */
+.steps{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px;counter-reset:s}
+@media (max-width:900px){.steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.steps{grid-template-columns:minmax(0,1fr)}}
+.steps li{counter-increment:s;min-width:0}
+.steps li::before{content:counter(s);display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--panel-2);border:1px solid #4a4239;font-family:var(--mono);font-weight:600;color:var(--amber);margin-bottom:12px}
+.steps h3{font-family:var(--label);font-weight:700;font-size:17px;letter-spacing:.16em;text-transform:uppercase;margin:0 0 6px}
+.steps p{margin:0;font-size:16px;color:var(--dim)}
+.steps code{font-family:var(--mono);font-size:13.5px;color:var(--ink);background:var(--panel-2);padding:1px 5px;border-radius:3px}
+.req{margin-top:30px;display:flex;flex-wrap:wrap;gap:8px}
+.req span{font-family:var(--label);font-weight:600;font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);border:1px solid var(--line);border-radius:999px;padding:5px 12px}
+
+/* community */
+.form-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:20px 40px;padding-bottom:22px;margin-bottom:6px;border-bottom:1px solid var(--line)}
+.form-head.full{grid-column:1/-1}
+.form-intro{min-width:0;max-width:62ch}
+.form-intro p{margin:0;font-size:18px;line-height:1.6}
+.form-intro p > span{display:block}
+.form-intro p > span + span{margin-top:6px}
+.form-intro .by{display:inline}
+.form-intro a{color:var(--amber);text-underline-offset:3px}
+.follow{min-width:0}
+
+.form-intro h2{font-family:var(--display);font-style:italic;font-weight:600;font-size:clamp(36px,5vw,54px);line-height:1.08;margin:0 0 14px;text-wrap:balance}
+.comm-intro{display:flex;flex-direction:column;gap:26px;min-width:0}
+.comm-intro p{margin:0;font-size:19px;max-width:44ch}
+.minilab{font-family:var(--label);font-weight:700;font-size:14px;letter-spacing:.22em;text-transform:uppercase;color:var(--dim);margin-bottom:10px}
+.minilab .by{letter-spacing:.04em}
+.links{display:flex;flex-wrap:wrap;gap:8px}
+.links a{font-family:var(--label);font-weight:700;font-size:15px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink);text-decoration:none;border:1px solid #3a3a3a;border-radius:999px;padding:7px 14px}
+.links a:hover{border-color:var(--amber);color:var(--amber)}
+.links a:focus-visible{outline:2px solid var(--amber);outline-offset:3px}
+.mailline{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px}
+.mailline .addr{font-family:var(--mono);font-size:16px;color:var(--amber);overflow-wrap:anywhere;user-select:all}
+.copy{appearance:none;cursor:pointer;background:var(--amber);color:#1a1006;border:0;border-radius:5px;font-family:var(--label);font-weight:700;font-size:15px;letter-spacing:.16em;text-transform:uppercase;padding:9px 16px}
+.copy.sm{font-size:13px;padding:6px 11px;background:var(--panel-2);color:var(--ink);border:1px solid #3a3a3a}
+.copy:focus-visible{outline:2px solid var(--amber);outline-offset:3px}
+.form{background:var(--module);border:1px solid var(--line);border-radius:8px;padding:30px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 18px;min-width:0}
+@media (max-width:560px){.form{grid-template-columns:minmax(0,1fr);padding:18px}}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field.full{grid-column:1/-1}
+.field label,.field legend{font-family:var(--label);font-weight:700;font-size:13.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+.field .opt{font-weight:500;letter-spacing:.06em;text-transform:none;color:var(--faint)}
+.field input,.field select,.field textarea{font:inherit;font-size:16px;color:var(--ink);background:#000;border:1px solid #333;border-radius:5px;padding:10px 12px;min-width:0;width:100%}
+.field textarea{min-height:92px;resize:vertical}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--amber);box-shadow:0 0 0 2px rgba(240,166,58,.25)}
+.field input[aria-invalid="true"]{border-color:#d4563b}
+.err{font-size:14px;color:#e8775e;min-height:0}
+fieldset.field{border:0;padding:0;margin:0}
+.checks{display:flex;flex-direction:column;gap:10px}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;color:var(--ink);line-height:1.45;cursor:pointer}
+.check input{width:18px;height:18px;margin:2px 0 0;flex:none;accent-color:var(--amber)}
+.field label.check{font-family:var(--body);font-weight:400;font-size:15.5px;letter-spacing:0;text-transform:none;color:var(--ink)}
+.field label.check.consent{color:var(--dim);font-size:14.5px}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.form-foot{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:14px}
+.form .btn{flex-direction:row}
+.msg{margin:0;font-size:16px;color:var(--dim)}
+.msg.ok{color:var(--amber)}
+.msg.bad{color:#e8775e}
+
+/* download */
+.dl-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px 40px}
+.dl-text{margin:0;font-size:19px;max-width:46ch}
+.dl-row .actions{margin-top:0}
+
+/* license and verification */
+.lic{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:36px;align-items:start}
+@media (max-width:860px){.lic{grid-template-columns:minmax(0,1fr)}}
+.lic h3{font-family:var(--label);font-weight:700;font-size:16px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber);margin:0 0 8px}
+.lic-block{display:flex;flex-direction:column;gap:26px;min-width:0}
+.lic p{margin:0;font-size:17px;max-width:60ch}
+.lic p+p{margin-top:8px}
+.lic .small-p{font-size:15.5px;color:var(--dim)}
+.credit{font-family:var(--mono);font-size:14.5px;color:var(--ink);background:var(--panel-2);border:1px solid var(--line);border-radius:5px;padding:10px 14px;margin-top:10px;overflow-wrap:anywhere;user-select:all}
+.verify{background:var(--lcd);border:2px solid #000;border-radius:6px;padding:18px 20px;box-shadow:inset 0 0 26px var(--lcd-glow);min-width:0;color:var(--amber)}
+.verify .lab{font-family:var(--mono);font-size:12px;opacity:.8;letter-spacing:.08em}
+.verify .fname{font-family:var(--mono);font-size:14px;margin-top:8px;color:var(--ink)}
+.verify .hash{font-family:var(--mono);font-size:14px;font-weight:600;line-height:1.5;margin:6px 0 14px;overflow-wrap:anywhere;word-break:break-all;user-select:all}
+.verify .cmd{font-family:var(--mono);font-size:13px;color:var(--ink);background:#000;border-radius:4px;padding:8px 10px;margin:8px 0 0;overflow-wrap:anywhere;user-select:all}
+.verify p{font-family:var(--body);font-size:15px;color:var(--dim);margin:12px 0 0}
+.verify h3{margin:0 0 4px}
+.verify h3 + p{margin:0 0 16px}
+.lic a{color:var(--amber)}
+
+footer{border-top:1px solid var(--line);padding-block:30px 40px;font-size:15px;color:var(--faint)}
+footer .row{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:10px 30px}
+footer b{font-family:var(--label);font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+
+@media (max-width:560px){body{font-size:17px}.lede{font-size:20px}section{padding-block:48px}.lcd .l2{font-size:24px}}
+@media (prefers-reduced-motion:reduce){.lcd .cursor{animation:none}.progress i{transition:none}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="topbar">
+            <div class="lang" role="group" aria-label="Language / Idioma">
+        <button class="tab" type="button" id="lang-en" data-lang="en" aria-pressed="false"><span class="led"></span>English</button>
+        <button class="tab" type="button" id="lang-es" data-lang="es" aria-pressed="true"><span class="led"></span>Español</button>
+      </div>
+    </div>
+    <h1 class="mark">Polymorph<span>.</span></h1>
+    <div class="hero-grid">
+      <div>
+        <p class="lede" data-i18n="lede"></p>
+      </div>
+    </div>
+
+    <div class="viewer">
+      <div class="tabs" role="tablist" aria-label="Polymorph">
+        <button class="tab" role="tab" id="tab-synth" aria-selected="true" data-k="synth" type="button"><span class="led"></span><span data-i18n="tab_synth"></span></button>
+        <button class="tab" role="tab" id="tab-seq" aria-selected="false" data-k="seq" type="button"><span class="led"></span><span data-i18n="tab_seq"></span></button>
+        <button class="tab" role="tab" id="tab-fx" aria-selected="false" data-k="fx" type="button"><span class="led"></span><span data-i18n="tab_fx"></span></button>
+      </div>
+      <div class="shot"><img id="shot" src="media/synth.jpg" alt="" width="1800" height="907"></div>
+      <p class="shot-cap" id="shot-cap"></p>
+    </div>
+  </div>
+</header>
+
+<main>
+<section id="inside">
+  <div class="wrap">
+    <div class="mod-h" data-i18n="h_inside"></div>
+    <div class="inside">
+      <div class="cell"><h3 data-i18n="c1h"></h3><p data-i18n="c1p"></p><div class="spec" data-i18n="c1s"></div></div>
+      <div class="cell"><h3 data-i18n="c2h"></h3><p data-i18n="c2p"></p><div class="spec">LP24 · HP · BP<br>20 Hz – 20 kHz</div></div>
+      <div class="cell"><h3 data-i18n="c3h"></h3><p data-i18n="c3p"></p><div class="spec">KICK · SNARE · CLAP<br>CL HAT · OP HAT · PERC</div></div>
+      <div class="cell"><h3 data-i18n="c4h"></h3><p data-i18n="c4p"></p><div class="spec">1:2 · 3:4 · PRE · FILL<br>±12 TICKS · SWING 50–75 %</div></div>
+      <div class="cell"><h3 data-i18n="c5h"></h3><p data-i18n="c5p"></p><div class="spec">ECHO 50–700 ms · REVERB 0.2–10 s<br>REC → WAV 48 kHz · 24 BIT</div></div>
+      <div class="cell"><h3 data-i18n="c6h"></h3><p data-i18n="c6p"></p><div class="spec">CLOCK OUT · TAKEOVER<br>LIGHT LAPTOP</div></div>
+      <div class="cell wide"><h3 data-i18n="c7h"></h3><p data-i18n="c7p"></p><div class="spec">TECHNO · ACID · HOUSE · DUB TECHNO · INDUSTRIAL · JUNGLE · ELECTRO · AMBIENT</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="start">
+  <div class="wrap">
+    <div class="mod-h" data-i18n="h_start"></div>
+    <ol class="steps">
+      <li><h3 data-i18n="s1h"></h3><p data-i18n="s1p"></p></li>
+      <li><h3 data-i18n="s2h"></h3><p data-i18n="s2p"></p></li>
+      <li><h3 data-i18n="s3h"></h3><p data-i18n="s3p"></p></li>
+      <li><h3 data-i18n="s4h"></h3><p data-i18n="s4p"></p></li>
+    </ol>
+    <div class="req"><span>Windows 10 / 11</span><span data-i18n="r1"></span><span data-i18n="r2"></span><span data-i18n="r3"></span></div>
+  </div>
+</section>
+
+<section id="license">
+  <div class="wrap">
+    <div class="mod-h" data-i18n="h_lic"></div>
+    <div class="lic">
+      <div class="lic-block">
+        <div><h3 data-i18n="lic_h"></h3><p data-i18n="lic_p"></p><p class="small-p" data-i18n="lic_link"></p></div>
+        <div><h3 data-i18n="cred_h"></h3><p data-i18n="cred_p"></p><div class="credit" id="credit-line"></div></div>
+        <div><h3 data-i18n="warr_h"></h3><p data-i18n="warr_p"></p></div>
+      </div>
+      <div class="verify">
+        <h3 data-i18n="ver_h"></h3>
+        <p data-i18n="ver_intro"></p>
+        <div class="lab" data-i18n="ver_lab"></div>
+        <div class="fname" id="ver-file"></div>
+        <div class="hash" id="ver-hash"></div>
+        <button class="copy" id="copy-hash" type="button" data-i18n="ver_copy"></button>
+        <p data-i18n="ver_how"></p>
+        <div class="cmd" id="ver-cmd"></div>
+        <p data-i18n="ver_bad"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="community">
+  <div class="wrap">
+    <div class="mod-h" data-i18n="h_comm"></div>
+    <form class="form" id="join" novalidate>
+      <div class="form-head full">
+        <div class="form-intro">
+          <h2 data-i18n="comm_h2"></h2>
+          <p id="comm-p"></p>
+        </div>
+      </div>
+      <div class="field"><label for="f-name" data-i18n="f_name"></label><input id="f-name" name="name" type="text" autocomplete="name" required><span class="err" id="e-name"></span></div>
+      <div class="field"><label for="f-email" data-i18n="f_email"></label><input id="f-email" name="email" type="email" autocomplete="email" required><span class="err" id="e-email"></span></div>
+      <div class="field full"><label for="f-links"><span data-i18n="f_links"></span> <span class="opt" data-i18n="opt"></span></label><input id="f-links" name="links" type="text"></div>
+      <div class="field"><label for="f-city"><span data-i18n="f_city"></span> <span class="opt" data-i18n="opt"></span></label><input id="f-city" name="city" type="text" autocomplete="address-level2"></div>
+      <div class="field"><label for="f-role"><span data-i18n="f_role"></span> <span class="opt" data-i18n="opt"></span></label>
+        <select id="f-role" name="role"><option value="" data-i18n="r_none"></option><option value="music" data-i18n="r_music"></option><option value="sound-art" data-i18n="r_sound"></option><option value="visuals" data-i18n="r_visual"></option><option value="code" data-i18n="r_code"></option><option value="listener" data-i18n="r_listen"></option></select></div>
+      <div class="field full"><label for="f-msg"><span data-i18n="f_msg"></span> <span class="opt" data-i18n="opt"></span></label><textarea id="f-msg" name="message"></textarea></div>
+      <fieldset class="field full"><legend data-i18n="f_want"></legend>
+        <div class="checks">
+          <label class="check"><input type="checkbox" id="f-news" name="updates" checked><span data-i18n="w_news"></span></label>
+          <label class="check"><input type="checkbox" id="f-proj" name="projects"><span data-i18n="w_proj"></span></label>
+        </div>
+      </fieldset>
+      <div class="field full">
+        <label class="check consent"><input type="checkbox" id="f-consent" name="consent" required><span data-i18n="consent"></span></label>
+        <span class="err" id="e-consent"></span>
+      </div>
+      <div class="hp" aria-hidden="true"><label for="f-hp">Leave empty</label><input id="f-hp" name="_gotcha" type="text" tabindex="-1" autocomplete="off"></div>
+      <div class="form-foot"><button class="btn btn-primary" id="join-btn" type="submit" data-i18n="send"></button><p class="msg" id="join-msg" role="status" aria-live="polite"></p></div>
+    </form>
+  </div>
+</section>
+
+<section id="download">
+  <div class="wrap">
+    <div class="mod-h" data-i18n="h_dl"></div>
+    <div class="dl-row">
+      <p class="dl-text" data-i18n="dl_text"></p>
+      <div class="actions">
+        <a class="btn btn-primary" id="dl-pkg" href="#" download><span data-i18n="dl"></span><small data-i18n="dl_sub"></small></a>
+        <a class="btn btn-ghost" id="dl-manual" href="media/Polymorph_Manual.pdf" target="_blank" rel="noopener"><span data-i18n="man"></span><small data-i18n="man_sub"></small></a>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap row">
+    <span><b>Polymorph v0.33</b> · CC BY 4.0</span>
+    <span data-i18n="f1"></span>
+  </div>
+</footer>
+
+<script>
+(() => {
+  // ===== Settings you can change =====
+  // Where the Download button points. A file name next to this page, or a full link (Google Drive, etc.).
+  const DOWNLOAD_URL = "https://github.com/santiagoparada/polymorph/releases/download/v0.33/Polymorph_v0.33.zip";
+  // The official file: name and SHA-256 fingerprint. Update both whenever a new zip is published.
+  // Where the community form sends its data: the web-app address of the Google Apps Script
+  // attached to your Google Sheet (it ends in /exec). Empty = the form shows your email instead.
+  const FORM_ENDPOINT = "https://script.google.com/macros/s/AKfycby-xFEJzbV6LDJSG-W02aepBEU9iCGn1sez9lSoOIfsJg3t-BLEiP6wx3MP2MNAHBYSdQ/exec";
+  // Your links. Only the ones with an address are shown.
+  const SOCIAL = [
+    { name:"Bandcamp", url:"https://trrngr.bandcamp.com" },
+    { name:"Instagram", url:"" },
+    { name:"SoundCloud", url:"https://soundcloud.com/trrngr" },
+    { name:"YouTube", url:"" },
+  ];
+  const OFFICIAL = { file:"Polymorph_v0.33.zip", sha256:"693191022a9894f3ea069de34316a92933913f1019803e55da2995ee19b66df0" };
+
+  const T = {
+    en: {
+      lede:"A four-track synthesizer, drum machine and step sequencer.",
+      dl:"Download Polymorph", dl_sub:"v0.33 · 102 MB zip · Windows 10/11",
+      man:"Get the manual", man_sub:"PDF · 38 pages · English",
+      lcd2:"READY", lcd3:"4 TRACKS · SYNTH · DRUMS · FX",
+      lcd_dl:["DOWNLOADING","EXTRACT IT, THEN OPEN POLYMORPH.EXE"], lcd_man:["OPENING","PDF · 38 PAGES"],
+      tab_synth:"Synth page", tab_seq:"Sequencer", tab_fx:"FX page",
+      shots:{
+        synth:["The Polymorph synth page: oscillators, ladder filter, contours, LFO and mixer","The synth page: two oscillators with FM and ring, the ladder filter, two contours, the LFO, the arpeggiator and the mixer. REC MASTER sits bottom left."],
+        seq:["The Polymorph sequencer page: patterns, tracks, steps and the step editor","The sequencer page: 16 patterns, four tracks of up to 64 steps, and the step editor with locks, chance and conditions."],
+        fx:["The Polymorph FX page: tape echo, reverb, rumble, sidechain duck, setup and MIDI","The FX page: tape echo, reverb, rumble and sidechain duck, with setup, groove and the three MIDI inputs below."]},
+      h_inside:"What's inside",
+      c1h:"Synth voices", c1p:"Two oscillators with through-zero FM and ring modulation, a sub, noise, drive and slow analog drift.", c1s:"SINE · SAW · SQUARE · TRI<br>UP TO 8 VOICES",
+      c2h:"Ladder filter", c2p:"A 24 dB ladder with low-pass, high-pass and band-pass. Switch on OSC and it sings by itself, in tune with the keys.",
+      c3h:"Drum machine", c3p:"Any track can become a kit of six synthesized drums with their own tune, decay, drive and tone.",
+      c4h:"Sequencer", c4p:"Four tracks of up to 64 steps, 16 patterns, parameter locks, accent and slide, chance, conditions, fills and microtiming.",
+      c5h:"Effects and recording", c5p:"A tape echo with three heads and HOLD, a reverb, a sidechain duck and a rumble under the kick. Press REC to record everything you hear to a WAV file.",
+      c7h:"Manual and starters", c7p:"Inside the manual you'll find eight starting points for different genres, each a full pattern with sounds and effects, and how to map your MIDI controllers, so you can start playing right away.",
+      c6h:"Controllers and MIDI", c6p:"Connect different MIDI controllers at once: pads, keyboards, fader boxes. Three inputs, MAP mode to link any knob, and MIDI clock out so your hardware follows.",
+      h_lic:"License and official file",
+      lic_h:"Creative Commons BY 4.0",
+      lic_p:"Polymorph is by _trrngr_ and is shared under the Creative Commons Attribution 4.0 International license. You may use it, copy it, share it, modify it and take it apart as you like, as long as you credit its author.",
+      lic_link:"Full license: <a href=\"https://creativecommons.org/licenses/by/4.0/\" target=\"_blank\" rel=\"noopener\">creativecommons.org/licenses/by/4.0</a>",
+      cred_h:"How to credit", cred_p:"Wherever you use or share Polymorph, or music made with it, write this line. If you changed it, say it is a modified version.",
+      credit:"Polymorph by _trrngr_ (CC BY 4.0)",
+      warr_h:"Guarantee",
+      warr_p:"I build and check the official Polymorph file myself before publishing it: it leaves my hands clean, with no viruses and nothing added, and it is exactly the file offered here. This guarantee covers only the file with the official fingerprint. I am not responsible for copies that third parties modify, redistribute or alter, or for anything someone does to them with bad intentions. If you got Polymorph somewhere else, check it before opening it.",
+      ver_h:"How the file record works",
+      ver_intro:"Every file has a SHA-256 fingerprint: a unique code calculated from its contents. Change a single byte and the fingerprint changes completely. This is the fingerprint of the official file, and it is also published on the GitHub release.",
+      ver_lab:"OFFICIAL FILE · SHA-256 FINGERPRINT", ver_copy:"Copy fingerprint",
+      ver_how:"To check your copy, open PowerShell in the folder where you saved it and type:",
+      ver_bad:"If the number it shows is different, the file is not the original. Don't open it; download it again from this page.",
+      h_start:"Download and installation",
+      s1h:"Download", s1p:"Save the zip with the Download button at the end of this page. Keep the manual close; chapter 2 walks you through the first start.",
+      s2h:"Extract", s2p:"Right-click the zip and choose Extract All. Keep the <code>Polymorph</code> folder together.",
+      s3h:"Open", s3p:"Double-click <code>Polymorph.exe</code>. If Windows says it protected your PC, choose More info, then Run anyway.",
+      s4h:"Set 48 kHz", s4p:"Set your Windows sound output to 48 kHz for the fast WASAPI driver, then press AUDIO ON and play.",
+      r1:"Any MIDI pads or keys (optional)", r2:"Computer keyboard plays notes", r3:"Your saved work stays in the user folder",
+      h_comm:"Community",
+      h_dl:"Download", dl_text:"Polymorph is free. Download it, read the manual and make your music.",
+      comm_h2:"Let's stay in touch.",
+      comm_p:["Polymorph is a project by <span class=\"by\">_trrngr_</span>.", "Follow me on {links} to hear my music.", "Leave your details and I'll let you know when there's a new version.", "And tell me what you do: I'd love to hear your music and learn about your projects."], and_word:" and ",
+      follow_lab:"Follow <span class=\"by\">_trrngr_</span>",
+      f_name:"Name or alias", f_email:"Email", f_links:"Your socials or your music", f_city:"City and country", f_role:"What do you do?", f_msg:"Tell me something", opt:"(optional)",
+      r_none:"Choose one", r_music:"Music", r_sound:"Sound and sound art", r_visual:"Visuals", r_code:"Code", r_listen:"I listen",
+      f_want:"I want",
+      w_news:"to hear about new versions of Polymorph", w_proj:"to take part in future projects",
+      consent:"I authorize _trrngr_ to keep these details only to contact me about Polymorph and future projects. They are not sold or shared. I can ask for them to be deleted at any time by writing to parada.santi@gmail.com.",
+      send:"Join",
+      e_name:"Write your name or alias.", e_email:"Write a valid email address.", e_consent:"Tick the box so I can keep your details.",
+      sending:"Sending…", ok:"Thank you, {n}! You're in. I'll write to you soon.",
+      fail:"It couldn't be sent. Check your connection and try again.",
+      off:"The form isn't active yet. Try again later.",
+      copy:"Copy", copied:"Copied.", selected:"Selected. Press Ctrl+C to copy.",
+      f1:"a project by <span class=\"by\">_trrngr_</span>",
+      title:"Polymorph"
+    },
+    es: {
+      lede:"Un sintetizador de cuatro pistas, caja de ritmos y secuenciador por pasos.",
+      dl:"Descargar Polymorph", dl_sub:"v0.33 · zip de 102 MB · Windows 10/11",
+      man:"Ver el manual", man_sub:"PDF · 38 páginas · en inglés",
+      lcd2:"LISTO", lcd3:"4 PISTAS · SYNTH · DRUMS · FX",
+      lcd_dl:["DESCARGANDO","DESCOMPRIME Y ABRE POLYMORPH.EXE"], lcd_man:["ABRIENDO","PDF · 38 PÁGINAS"],
+      tab_synth:"Página synth", tab_seq:"Secuenciador", tab_fx:"Página FX",
+      shots:{
+        synth:["La página synth de Polymorph: osciladores, filtro ladder, envolventes, LFO y mezclador","La página synth: dos osciladores con FM y ring, el filtro ladder, dos envolventes, el LFO, el arpegiador y el mezclador. REC MASTER está abajo a la izquierda."],
+        seq:["La página del secuenciador de Polymorph: patrones, pistas, pasos y editor de paso","El secuenciador: 16 patrones, cuatro pistas de hasta 64 pasos y el editor de paso con locks, probabilidad y condiciones."],
+        fx:["La página FX de Polymorph: eco de cinta, reverb, rumble, sidechain, ajustes y MIDI","La página FX: eco de cinta, reverb, rumble y sidechain, con los ajustes, el groove y las tres entradas MIDI abajo."]},
+      h_inside:"Qué trae",
+      c1h:"Voces de synth", c1p:"Dos osciladores con FM through-zero y modulación en anillo, sub, ruido, saturación y una leve deriva analógica.", c1s:"SINE · SAW · SQUARE · TRI<br>HASTA 8 VOCES",
+      c2h:"Filtro ladder", c2p:"Un ladder de 24 dB con paso bajo, paso alto y paso banda. Activa OSC y canta solo, afinado con el teclado.",
+      c3h:"Caja de ritmos", c3p:"Cualquier pista puede ser un kit de seis tambores sintetizados, cada uno con su afinación, decay, saturación y tono.",
+      c4h:"Secuenciador", c4p:"Cuatro pistas de hasta 64 pasos, 16 patrones, parameter locks, acento y slide, probabilidad, condiciones, fills y microtiming.",
+      c5h:"Efectos y grabación", c5p:"Un eco de cinta con tres cabezas y HOLD, una reverb, un sidechain y un rumble bajo el bombo. Pulsa REC y grabas todo lo que suena en un archivo WAV.",
+      c7h:"Manual y presets", c7p:"Dentro del manual encontrarás ocho presets para empezar en distintos géneros, cada uno un patrón completo con sonidos y efectos, y cómo mapear tus controladores MIDI, para que empieces a tocar de una.",
+      c6h:"Controladores y MIDI", c6p:"Conecta distintos controladores MIDI a la vez: pads, teclados, superficies de faders. Tres entradas, modo MAP para asignar cualquier perilla y salida de reloj MIDI para que tu hardware lo siga.",
+      h_lic:"Licencia y archivo oficial",
+      lic_h:"Creative Commons BY 4.0",
+      lic_p:"Polymorph es de _trrngr_ y se comparte con la licencia Creative Commons Atribución 4.0 Internacional. Puedes usarlo, copiarlo, compartirlo, modificarlo y desarmarlo como quieras, siempre que menciones a su autor.",
+      lic_link:"Licencia completa: <a href=\"https://creativecommons.org/licenses/by/4.0/deed.es\" target=\"_blank\" rel=\"noopener\">creativecommons.org/licenses/by/4.0/deed.es</a>",
+      cred_h:"Cómo dar crédito", cred_p:"Donde uses o compartas Polymorph, o música hecha con él, escribe esta línea. Si lo modificaste, indica que es una versión modificada.",
+      credit:"Polymorph, de _trrngr_ (CC BY 4.0)",
+      warr_h:"Garantía",
+      warr_p:"El archivo oficial de Polymorph lo preparo y reviso yo antes de publicarlo: sale limpio, sin virus ni nada añadido, y es exactamente el que se ofrece aquí. Esta garantía cubre solo el archivo con la huella oficial. No me hago responsable de copias que terceros modifiquen, redistribuyan o alteren, ni de lo que alguien les haga con malas intenciones. Si conseguiste Polymorph por otro lado, compruébalo antes de abrirlo.",
+      ver_h:"Cómo funciona el registro del archivo",
+      ver_intro:"Cada archivo tiene una huella SHA-256: un código único que se calcula a partir de su contenido. Si alguien cambia un solo byte, la huella cambia por completo. Esta es la huella del archivo oficial, y también está publicada en la Release de GitHub.",
+      ver_lab:"ARCHIVO OFICIAL · HUELLA SHA-256", ver_copy:"Copiar huella",
+      ver_how:"Para comprobar tu copia, abre PowerShell en la carpeta donde la guardaste y escribe:",
+      ver_bad:"Si el número que aparece es distinto, el archivo no es el original. No lo abras; descárgalo de nuevo desde esta página.",
+      h_start:"Instrucciones de descarga e instalación",
+      s1h:"Descarga", s1p:"Guarda el zip con el botón Descargar, al final de esta página. Ten el manual a mano; el capítulo 2 te guía en el primer arranque.",
+      s2h:"Descomprime", s2p:"Clic derecho sobre el zip y elige Extraer todo. Mantén junta la carpeta <code>Polymorph</code>.",
+      s3h:"Abre", s3p:"Doble clic en <code>Polymorph.exe</code>. Si Windows dice que protegió tu PC, elige Más información y luego Ejecutar de todas formas.",
+      s4h:"Pon 48 kHz", s4p:"Configura la salida de sonido de Windows a 48 kHz para el driver rápido WASAPI, luego pulsa AUDIO ON y toca.",
+      r1:"Pads o teclado MIDI (opcional)", r2:"El teclado del computador toca notas", r3:"Lo que guardas queda en la carpeta user",
+      h_comm:"Comunidad",
+      h_dl:"Descarga", dl_text:"Polymorph es gratis. Descárgalo, lee el manual y haz tu música.",
+      comm_h2:"Sigamos en contacto.",
+      comm_p:["Polymorph es un proyecto de <span class=\"by\">_trrngr_</span>.", "Sígueme en {links} para escuchar mi música.", "Déjame tus datos y te aviso cuando haya una versión nueva.", "Y cuéntame qué haces: me encantaría oír tu música y conocer tus proyectos."], and_word:" y ",
+      follow_lab:"Sigue a <span class=\"by\">_trrngr_</span>",
+      f_name:"Nombre o alias", f_email:"Correo", f_links:"Tus redes o tu música", f_city:"Ciudad y país", f_role:"¿Qué haces?", f_msg:"Cuéntame algo", opt:"(opcional)",
+      r_none:"Elige una", r_music:"Música", r_sound:"Sonido y arte sonoro", r_visual:"Visuales", r_code:"Código", r_listen:"Escucho",
+      f_want:"Quiero",
+      w_news:"enterarme de las nuevas versiones de Polymorph", w_proj:"participar en futuros proyectos",
+      consent:"Autorizo a _trrngr_ a guardar estos datos solo para contactarme sobre Polymorph y futuros proyectos. No se venden ni se comparten. Puedo pedir que los borre en cualquier momento escribiendo a parada.santi@gmail.com.",
+      send:"Unirme",
+      e_name:"Escribe tu nombre o alias.", e_email:"Escribe un correo válido.", e_consent:"Marca la casilla para que pueda guardar tus datos.",
+      sending:"Enviando…", ok:"¡Gracias, {n}! Ya estás dentro. Te escribo pronto.",
+      fail:"No se pudo enviar. Revisa tu conexión e inténtalo de nuevo.",
+      off:"El formulario todavía no está activo. Inténtalo más tarde.",
+      copy:"Copiar", copied:"Copiada.", selected:"Seleccionada. Pulsa Ctrl+C para copiar.",
+      f1:"un proyecto de <span class=\"by\">_trrngr_</span>",
+      title:"Polymorph"
+    }
+  };
+
+  const $ = id => document.getElementById(id);
+  const lcd = (a,b,c) => { const e1=$("lcd1"); if(!e1) return; if(a!=null) e1.textContent=a; if(b!=null) $("lcd2").textContent=b; if(c!=null) $("lcd3").textContent=c; };
+  $("dl-pkg").href = DOWNLOAD_URL;
+  if (/^https?:/.test(DOWNLOAD_URL)) { $("dl-pkg").removeAttribute("download"); $("dl-pkg").target="_blank"; $("dl-pkg").rel="noopener"; }
+
+  let lang = "en", shotKey = "synth";
+
+
+  function setShot(k){
+    shotKey = k;
+    document.querySelectorAll("[data-k]").forEach(x => x.setAttribute("aria-selected", String(x.dataset.k===k)));
+    const s = T[lang].shots[k]; $("shot").src = "media/"+k+".jpg"; $("shot").alt = s[0]; $("shot-cap").textContent = s[1];
+  }
+
+  function setLang(l){
+    lang = l; const t = T[l];
+    document.documentElement.lang = l;
+    document.querySelectorAll("[data-i18n]").forEach(el => { const v = t[el.dataset.i18n]; if (typeof v === "string") el.innerHTML = v; });
+    document.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang===l)));
+    lcd("POLYMORPH v0.33", t.lcd2, t.lcd3);
+    $("credit-line").textContent = t.credit;
+    setShot(shotKey); renderSocial();
+    try { localStorage.setItem("polymorph-lang-v2", l); } catch(e) {}
+  }
+
+  document.querySelectorAll("[data-k]").forEach(b => b.addEventListener("click", () => setShot(b.dataset.k)));
+  document.querySelectorAll("[data-lang]").forEach(b => b.addEventListener("click", () => setLang(b.dataset.lang)));
+  $("dl-pkg").addEventListener("click", () => lcd("POLYMORPH v0.33", ...T[lang].lcd_dl));
+  $("dl-manual").addEventListener("click", () => lcd("MANUAL", ...T[lang].lcd_man));
+  $("ver-file").textContent = OFFICIAL.file;
+  $("ver-hash").textContent = OFFICIAL.sha256.toUpperCase();
+  $("ver-cmd").textContent = "Get-FileHash .\\" + OFFICIAL.file;
+  $("copy-hash").addEventListener("click", () => {
+    const b = $("copy-hash"), t = T[lang];
+    const sel = () => { const r = document.createRange(); r.selectNodeContents($("ver-hash")); const g = getSelection(); g.removeAllRanges(); g.addRange(r); };
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(OFFICIAL.sha256.toUpperCase()).then(() => { b.textContent = lang==="es" ? "Huella copiada" : "Fingerprint copied"; setTimeout(()=>{ b.textContent = t.ver_copy; }, 2000); }, sel); else sel();
+  });
+
+  // ---- community form
+  const form = $("join"), msg = $("join-msg");
+  const setErr = (id, text) => { const e = $("e-"+id), f = $("f-"+id); e.textContent = text || ""; if (f) f.setAttribute("aria-invalid", text ? "true" : "false"); };
+  function validate(){
+    const t = T[lang]; let ok = true;
+    const name = $("f-name").value.trim(), email = $("f-email").value.trim();
+    setErr("name", name ? "" : t.e_name); if (!name) ok = false;
+    const goodMail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    setErr("email", goodMail ? "" : t.e_email); if (!goodMail) ok = false;
+    setErr("consent", $("f-consent").checked ? "" : t.e_consent); if (!$("f-consent").checked) ok = false;
+    return ok;
+  }
+  form.addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const t = T[lang];
+    msg.className = "msg"; msg.textContent = "";
+    if (!validate()) { const first = form.querySelector('[aria-invalid="true"]'); if (first) first.focus(); return; }
+    if ($("f-hp").value) return;
+    if (!FORM_ENDPOINT) { msg.className = "msg bad"; msg.textContent = t.off; return; }
+    const data = {
+      name: $("f-name").value.trim(), email: $("f-email").value.trim(), links: $("f-links").value.trim(),
+      city: $("f-city").value.trim(), role: $("f-role").value, message: $("f-msg").value.trim(),
+      updates: $("f-news").checked ? "yes" : "no", projects: $("f-proj").checked ? "yes" : "no",
+      consent: "yes", language: lang, _gotcha: $("f-hp").value
+    };
+    const btn = $("join-btn"); btn.disabled = true; msg.textContent = t.sending;
+    try {
+      // A simple form POST (no custom headers) to the Google Apps Script web app; its JSON reply
+      // says whether the row was really saved. Anything else counts as a failure.
+      const r = await fetch(FORM_ENDPOINT, { method:"POST", body: new URLSearchParams(data), redirect:"follow" });
+      const reply = await r.json().catch(() => null);
+      if (!reply || reply.ok !== true) throw new Error(reply && reply.error ? reply.error : "no reply");
+      msg.className = "msg ok"; msg.textContent = t.ok.replace("{n}", data.name);
+      form.reset(); $("f-news").checked = true;
+    } catch (e) {
+      msg.className = "msg bad"; msg.textContent = t.fail;
+    } finally { btn.disabled = false; }
+  });
+
+  function renderSocial(){
+    // The community text, one sentence per line; {links} becomes the social links that have an address.
+    const t = T[lang], list = SOCIAL.filter(x => x.url);
+    const esc = v => String(v).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+    const anchors = list.map(x => `<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.name)}</a>`);
+    const joined = anchors.length > 1 ? anchors.slice(0, -1).join(", ") + t.and_word + anchors[anchors.length - 1] : (anchors[0] || "");
+    $("comm-p").innerHTML = t.comm_p
+      .filter(line => !line.includes("{links}") || anchors.length)
+      .map(line => `<span>${line.replace("{links}", joined)}</span>`).join("");
+  }
+
+  // The page always opens in Spanish; English only if the visitor chose it before.
+  let start = "es";
+  try { if (localStorage.getItem("polymorph-lang-v2") === "en") start = "en"; } catch(e) {}
+  setLang(start);
+})();
+</script>
+</body>
+</html>
